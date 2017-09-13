@@ -42,12 +42,9 @@ def main():
     phi[0] = periodic_BC(phi,c,nx)
     phi[nx] = phi[0]
     
-
     phi = first_timestep(phi_old,c,nx)
     
     c=np.zeros((nx+1,nt+1))
-
-    
     for i in xrange(1,nt):
         c[:,i] = phi*dt/dx # c is different for each time step
         print(np.max(c[:,i]))
@@ -57,12 +54,22 @@ def main():
     
     fig = plt.figure()
     plt.plot(x,initialBell(x),'b',label='initial')
-    plt.plot(x,phi,'r',label='final')
-    plt.annotate('c_max=%.2f'%(np.max(c)),xy=(0.15,0.8),xycoords='figure fraction')
+    plt.plot(x,phi,'r',label='final_Burger')
+    plt.annotate('c_max_Burger=%.2f'%(np.max(c)),xy=(0.15,0.8),xycoords='figure fraction')
+    
+# linear advection    
+    u=0.5
+    c_lin=np.ones((nx+1))*u*(dt/dx)
+    for i in xrange(1,nt):
+        phi_new = Burger(phi_old,phi,c_lin,nx)
+        phi_old = phi.copy()
+        phi = phi_new.copy()
+    plt.plot(x,phi,'g',label='final_lin_adv')
+    plt.annotate('c_lin_adv=%.2f'%(np.max(c_lin)),xy=(0.15,0.85),xycoords='figure fraction')
     plt.legend()
-    plt.show()
-    return c, phi 
+    plt.show()     
+    
 if __name__ == '__main__':
-    c, phi = main()
+    main()
     
     
