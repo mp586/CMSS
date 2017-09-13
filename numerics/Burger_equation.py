@@ -38,7 +38,9 @@ def main():
     phi = initialBell(x)
     phi_old = phi.copy()
     
-    c = phi*dt/dx    # for boundary condition calculation    
+    c = phi*dt/dx    # for boundary condition calculation 
+    # this is supposed to be calculated at each time step
+    # it's not just initial conditions!  
     phi[0] = periodic_BC(phi,c,nx)
     phi[nx] = phi[0]
     
