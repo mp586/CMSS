@@ -6,26 +6,26 @@ def initialBell(x):
     print(initialBell.__doc__)
     return np.where(x%1.<0.5, np.power(np.sin(2*x*np.pi), 2), 0) 
     # x%1 = x mod 1. 
-
-def periodic_BC(phi,c,nx):
-    phi_start = phi[0] - 0.5*c[0]*(phi[1] - phi[nx-1])
-    print('phi[0] is ',phi_start)
-    return phi_start
     
 def first_timestep(phi_old,c,nx):
     """ FTCS for the first timestep """
     phi = phi_old.copy()
-    for j in xrange(1,nx):
+    for j in xrange(-1,nx-1): # -1 = the last index, i.e. phi[nx]
+        #--> don't need the periodic BC 
         phi[j] = phi_old[j] - (c[j]/2.)*(phi_old[j+1] - phi_old[j-1])
         # use c in each spatial position j
+    #phi[0] = phi_old[0] - 0.5*c[0]*(phi_old[1] - phi_old[-1])
+    #phi[nx] = phi[0]
     return phi
     
     
 def Burger(phi_old,phi,c,nx):
     """ Non-linear advection, CTCS scheme """
     phi_new=phi_old.copy()
-    for j in xrange(1,nx):
-        phi_new[j] = phi_old[j] - c[j]*(phi[j+1] - phi[j-1])       
+    for j in xrange(-1,nx-1):
+        phi_new[j] = phi_old[j] - c[j]*(phi[j+1] - phi[j-1])
+    #phi_new[0] = phi_old[0] - c[0]*(phi[1] - phi[nx-1])
+    #phi_new[nx] = phi_new[0]
     return phi_new
     
 def main():
@@ -38,12 +38,7 @@ def main():
     phi = initialBell(x)
     phi_old = phi.copy()
     
-    c = phi*dt/dx    # for boundary condition calculation 
-    # this is supposed to be calculated at each time step
-    # it's not just initial conditions!  
-    phi[0] = periodic_BC(phi,c,nx)
-    phi[nx] = phi[0]
-    
+    c = phi*dt/dx     
     phi = first_timestep(phi_old,c,nx)
     
     c=np.zeros((nx+1,nt+1))

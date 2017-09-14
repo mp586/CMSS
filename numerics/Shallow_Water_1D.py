@@ -4,37 +4,48 @@ import matplotlib.pyplot as plt
 def initialStep(x): 
     """ Intitial Step for height """
     print(initialStep.__doc__)
-    return np.where(x<0.1,1.,0) 
+    return np.where(x<=0.1,1.,0) 
+    # x%1 = x mod 1. 
+    
+def initialBell(x): 
+    """Intitial Bell Funtion"""
+    print(initialBell.__doc__)
+    return np.where(x%1.<0.5, np.power(np.sin(2*x*np.pi), 2), 0) 
     # x%1 = x mod 1. 
     
 def unstaggered_1dSW(u_old,h_old,nx,dx,dt,H,g):
-    """ """
+    """ FTCS for non-rotating shallow water equations (1D) """
     u = u_old.copy()
     h = h_old.copy()
-    
-    for j in xrange(1,nx):      
-        u[j] = u_old[j] - g*(dt/2*dx)*(h_old[j+1] - h_old[j-1])
-        h[j] = h_old[j] - H*(dt/2*dx)*(u[j+1] - u[j-1])
-    u[0] = u_old[0] - g*(dt/2*dx)*(h_old[1] - h_old[nx-1])
-    h[0] = h_old[0] - H*(dt/2*dx)*(u[1] - u[nx-1])
-    h[nx] = h[0]
-    u[nx] = u[0]
+    for j in xrange(-1,nx-1): # -1 = last element phi[nx] --> avoid periodic BC    
+        u[j] = u_old[j] - g*(dt/(2.*dx))*(h_old[j+1] - h_old[j-1])
+        h[j] = h_old[j] - H*(dt/(2.*dx))*(u[j+1] - u[j-1])
+#    u[0] = u_old[0] - g*(dt/2*dx)*(h_old[1] - h_old[nx-1])
+#    h[0] = h_old[0] - H*(dt/2*dx)*(u[1] - u[nx-1])
+#    h[nx] = h[0]
+#    u[nx] = u[0]
     return u,h
     
-# def staggered_1dSW(u_old,h_old,nx,dx,dt,H,g,x_half): 
- # u_half = np.interp(x_half,x,u_old)   
+def staggered_1dSW(u_stgg_old,h_stgg_old,nx,dx,dt,H,g): 
+    u_stgg = u_stgg_old.copy()
+    h_stgg = h_stgg_old.copy()   
+    for j in xrange(-1,nx-1):
+        u_stgg[j] = u_stgg_old[j] - g*(dt/dx)*(h_stgg_old[j+1] - h_stgg_old[j])
+        h_stgg[j] = h_stgg_old[j] - H*(dt/dx)*(u_stgg[j] - u_stgg[j-1])        
+    return u_stgg, h_stgg
     
 def main():
     nx = 100
-    nt = 1000
-    H = 10 # height of water column
+    nt = 500
+    H = 5 # height of water column
     g = 9.81 
-    dt = 0.1
+    dt = 0.0001
     dx = 1./nx
     
     x = np.linspace(0.0, 1.0, nx+1)
-    h = initialStep(x)
-    u = np.ones((nx+1))*0.
+    h = initialBell(x)
+    u = np.ones((nx+1))*0.5
+    
     fig = plt.figure()
     plt.plot(x,h,'g',label='initial_h')
     plt.plot(x,u,'k',label='initial_u')
@@ -42,14 +53,24 @@ def main():
     u_old = u.copy()
     h_old = h.copy()
     
+    h_stgg_old = h.copy()    
+    x_half = x + dx/2.
+    u_stgg_old = np.interp(x_half,x,u) # interpolated to x_half
+    h_stgg_old = h.copy()
+    
     for i in xrange(1,nt):
         u, h = unstaggered_1dSW(u_old,h_old,nx,dx,dt,H,g)
         u_old = u.copy()
         h_old = h.copy()
-          
+        u_stgg, h_stgg = staggered_1dSW(u_stgg_old,h_stgg_old,nx,dx,dt,H,g)
+        u_stgg_old = u_stgg.copy()
+        h_stgg_old = h_stgg.copy()
+         
     plt.plot(x,u,'r',label='final_u')
     plt.plot(x,h,'b',label='final_h')
-    plt.ylim((0,20))
+    plt.plot(x,u_stgg,'Yellow',label='final_stgg_u')
+    plt.plot(x,h_stgg,'c',label='final_stgg_h')
+    plt.ylim((0,10))
     plt.legend()
     plt.show()
     
