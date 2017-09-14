@@ -36,8 +36,8 @@ def staggered_1dSW(u_stgg_old,h_stgg_old,nx,dx,dt,H,g):
     
 def main():
     nx = 100
-    nt = 500
-    H = 5 # height of water column
+    nt = 100
+    H = 20 # height of water column
     g = 9.81 
     dt = 0.0001
     dx = 1./nx
@@ -46,9 +46,12 @@ def main():
     h = initialBell(x)
     u = np.ones((nx+1))*0.5
     
+    h_init = h.copy()
+    u_init = u.copy()
+    
     fig = plt.figure()
-    plt.plot(x,h,'g',label='initial_h')
-    plt.plot(x,u,'k',label='initial_u')
+    plt.plot(x,h_init,'g',label='initial_h')
+    plt.plot(x,u_init,'orange',label='initial_u')
     
     u_old = u.copy()
     h_old = h.copy()
@@ -68,9 +71,26 @@ def main():
          
     plt.plot(x,u,'r',label='final_u')
     plt.plot(x,h,'b',label='final_h')
-    plt.plot(x,u_stgg,'Yellow',label='final_stgg_u')
-    plt.plot(x,h_stgg,'c',label='final_stgg_h')
-    plt.ylim((0,10))
+    plt.legend()
+    plt.annotate('nt = '+str(nt),xy=(0.7,0.15),xycoords='figure fraction')
+    plt.annotate('dt = '+str(dt),xy=(0.7,0.13),xycoords='figure fraction')
+    plt.annotate('dx = '+str(dx),xy=(0.7,0.11),xycoords='figure fraction')
+    plt.annotate('H = '+str(H),xy=(0.7,0.20),xycoords='figure fraction')    
+    plt.annotate('c = %.2f'%(np.sqrt(g*H)*(dt/dx)), xy=(0.7,0.17),xycoords='figure fraction')
+
+    plt.show()
+    plt.close()
+    
+    fig = plt.figure()
+    plt.plot(x,u_stgg,'r',label='final_stgg_u')
+    plt.plot(x,h_stgg,'b',label='final_stgg_h')
+    plt.plot(x,h_init,'g',label='initial_h')
+    plt.plot(x,u_init,'orange',label='initial_u')
+    plt.annotate('nt = '+str(nt),xy=(0.7,0.15),xycoords='figure fraction')
+    plt.annotate('dt = '+str(dt),xy=(0.7,0.13),xycoords='figure fraction')
+    plt.annotate('dx = '+str(dx),xy=(0.7,0.11),xycoords='figure fraction')
+    plt.annotate('H = '+str(H),xy=(0.7,0.20),xycoords='figure fraction')    
+    plt.annotate('c = %.2f'%(np.sqrt(g*H)*(dt/dx)), xy=(0.7,0.17),xycoords='figure fraction')
     plt.legend()
     plt.show()
     
