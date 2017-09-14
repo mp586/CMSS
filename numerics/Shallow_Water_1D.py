@@ -1,6 +1,8 @@
 import numpy as np 
 import matplotlib.pyplot as plt 
 
+# results are a bit weird for unstable (unstaggered) should be symmetric but instability is only on the side --> possibly a problem with the boundary conditions
+
 def initialStep(x): 
     """ Intitial Step for height """
     print(initialStep.__doc__)
@@ -36,8 +38,8 @@ def staggered_1dSW(u_stgg_old,h_stgg_old,nx,dx,dt,H,g):
     
 def main():
     nx = 100
-    nt = 100
-    H = 20 # height of water column
+    nt = 500
+    H = 5 # height of water column
     g = 9.81 
     dt = 0.0001
     dx = 1./nx
